@@ -82,12 +82,12 @@ Layer* OverMenu::createMenu(bool IsWin, int max,int current) {
 
 	OverMenu* menu = OverMenu::create();
 
-	menu->Win = IsWin;
+	menu->Win = IsWin;                     //保存游戏结果
 
 	menu->maxWave = max;
 
 	if (IsWin)
-		menu->wave = current + 1;
+		menu->wave = current + 1;          //胜利当前波数加一
 	else
 		menu->wave = current;
 
@@ -97,14 +97,15 @@ Layer* OverMenu::createMenu(bool IsWin, int max,int current) {
 
 }
 
+/*初始化结算菜单*/
 bool OverMenu::InitMenu() {
 
 	if (!Layer::init())
 		return false;
 
 	char namesize[15] = { 0 };
-	if (Win)
-		sprintf(namesize, "MAP/win.png");
+	if (Win)                                      //根据游戏结果调用不同的结算菜单
+		sprintf(namesize, "MAP/win.png");          
 	else
 		sprintf(namesize, "MAP/lose.png");
 
@@ -117,19 +118,21 @@ bool OverMenu::InitMenu() {
 
 	InitEvent();
 
-	GameManager::getGame()->setResult();
+	GameManager::getGame()->setResult();                     //设置游戏结果
 
 	return true;
 
 }
 
+/*设置游戏结果*/
 void OverMenu::Result() {
 
-	Size size = getChildByName("bg")->getContentSize();
+	auto bg = getChildByName("bg");
+
+	Size size =bg->getContentSize();
 
 	int life = GameManager::getGame()->Life;
 
-	auto bg = getChildByName("bg");
 
 	auto result = Sprite::create();
 
@@ -137,7 +140,7 @@ void OverMenu::Result() {
 
 	bg->addChild(result);
 
-	if (life >= 10)
+	if (life >= 10)                                 //根据萝卜剩余生命值显示不同的结果
 		result->setTexture("MAP/carrot3.png");
 	else if (life >= 4)
 		result->setTexture("MAP/carrot2.png");
@@ -211,7 +214,6 @@ void OverMenu::InitEvent() {
 		if (type == ui::Widget::TouchEventType::ENDED) {
 			Director::getInstance()->popScene();
 			if (GameManager::getGame()->currentLevel < GameManager::getGame()->maxLevel) {
-
 				if (Win)
 					Director::getInstance()->pushScene(DesertMap::createGame());
 				else

@@ -233,10 +233,10 @@
   <object id="127" name="tower4" x="292" y="366.5">
    <ellipse/>
   </object>
-  <object id="129" name="tower7" x="511" y="533">
+  <object id="129" name="tower8" x="511" y="533">
    <ellipse/>
   </object>
-  <object id="130" name="tower8" x="125" y="402">
+  <object id="130" name="tower7" x="125" y="402">
    <ellipse/>
   </object>
   <object id="196" name="tower1" x="448" y="198">

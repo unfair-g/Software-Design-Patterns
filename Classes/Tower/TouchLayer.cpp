@@ -15,10 +15,13 @@ bool TouchLayer::init()
 {
 	if (!Layer::init())
 		return false;
+
 	initEvent();
+
 	return true;
 }
 
+//添加事件监听
 void TouchLayer::initEvent()
 {
 	touchlistener = EventListenerTouchOneByOne::create();
@@ -28,6 +31,7 @@ void TouchLayer::initEvent()
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchlistener, this);
 }
 
+//对点击错误位置给出提示
 void TouchLayer::addWrongPlace(Point location)
 {
 	auto wrong = Sprite::create("GamePlay/warning.png");
@@ -49,7 +53,7 @@ void TouchLayer::onTouchEnded(Touch* touch, Event* event)
 	auto map = static_cast<MAP*>(Director::getInstance()->getRunningScene());
 	Point pos = touch->getLocation();//得到触摸位置
 
-
+	//点击其他位置，隐藏炮塔信息或选炮界面
 	for (size_t i = 0; i < map->terrain.size(); i++) {
 		auto element = map->terrain[i];
 		//若存在显示信息，则隐藏
@@ -63,6 +67,8 @@ void TouchLayer::onTouchEnded(Touch* touch, Event* event)
 			return;
 		}
 	}
+
+	//若点击到了基座位置，根据状态信息展示不同面板
 	for (size_t i = 0; i < map->terrain.size(); i++) {
 		auto element = map->terrain[i];
 		Rect rect = element->getBoundingBox();
@@ -77,8 +83,11 @@ void TouchLayer::onTouchEnded(Touch* touch, Event* event)
 		}
 	}
 
+	//检测是否点到了萝卜区域
 	auto carrot = map->getChildByName("carrot");
 	Rect rect = carrot->getBoundingBox();
+
+	//给出点击位置错误提示
 	if (!isRightPlace && !rect.containsPoint(pos))
 		addWrongPlace(pos);
 

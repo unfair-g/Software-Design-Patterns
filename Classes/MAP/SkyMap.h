@@ -4,16 +4,16 @@
 const int towerNum = 8;
 class SkyMap :public MAP {
 public:
-	static SkyMap* createGame();
+	static SkyMap* createGame();            //创建地图
 
 	CREATE_FUNC(SkyMap);
 private:
+	 
+	void loadPath();                       //装载怪物移动路径
 
-	void loadPath();
-
-	void loadWave();
+	void loadWave();                       //装载每波怪物信息
 
 	virtual bool init();
 
-	void addTerrains()override;
+	void addTerrains()override;           //装载基座
 };

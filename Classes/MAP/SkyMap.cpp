@@ -6,11 +6,13 @@
 USING_NS_CC;
 using namespace cocos2d::ui;
 
+/*装载怪物移动路径*/
 void SkyMap::loadPath() {
 
 	float x, y;
 
 	char namesize[10] = { 0 };
+
 	for (int i = 1; i <= 41; i++) {
 		sprintf(namesize, "p%d", i);
 		ValueMap point = Point->getObject(namesize);
@@ -18,6 +20,7 @@ void SkyMap::loadPath() {
 		y = point["y"].asFloat();
 		path.push_back(Vec2(x, y));
 	}
+
 	for (int i = 1; i <= 4; i++) {
 		sprintf(namesize, "corner%d", i);
 		ValueMap point = Corner->getObject(namesize);
@@ -25,6 +28,7 @@ void SkyMap::loadPath() {
 		y = point["y"].asFloat();
 		corner.push_back(Vec2(x, y));
 	}
+
 	ValueMap carrotloc = Object->getObject("carrot");
 	x = carrotloc["x"].asFloat();
 	y = carrotloc["y"].asFloat();
@@ -32,6 +36,7 @@ void SkyMap::loadPath() {
 
 }
 
+/*装载基座*/
 void SkyMap::addTerrains()
 {
 	float x, y;
@@ -51,6 +56,7 @@ void SkyMap::addTerrains()
 	}
 }
 
+/*装载每波怪物信息*/
 void SkyMap::loadWave() {
 	std::vector<std::vector<int>> skywave = {
 		{normal,normal,normal,normal,normal,normal,normal,normal,normal,normal},
@@ -82,16 +88,16 @@ bool SkyMap::init() {
 	if (!Scene::init())
 		return false;
 
-	GameManager::getGame()->init();
+	GameManager::getGame()->init();                      //初始化GameManager
 
-	tiledmap = TMXTiledMap::create("MAP/SKY/TileMap1.tmx");
+	tiledmap = TMXTiledMap::create("MAP/SKY/TileMap1.tmx");           //加载瓦片地图
 
 	addChild(tiledmap, -1);
 	if (tiledmap == nullptr)
 		return false;
 
-	GameManager::getGame()->Money = 1500;
-	GameManager::getGame()->currentLevel = 1;
+	GameManager::getGame()->Money = 1200;                //初始金钱数
+	GameManager::getGame()->currentLevel = 1;            //当前关卡数
 
 	loadWave();
 
@@ -100,6 +106,7 @@ bool SkyMap::init() {
 	addTerrains();
 
 	loadPath();
+
 	return true;
 
 }

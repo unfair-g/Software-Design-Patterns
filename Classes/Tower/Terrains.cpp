@@ -5,11 +5,13 @@
 #include"Manager/GameManager.h"
 #include"Manager/SoundManager.h"
 using namespace cocos2d::ui;
+//创建基座
 Terrains* Terrains::createTerrain()
 {
 	return  Terrains::create();
 }
 
+//进行初始化工作
 bool Terrains::init()
 {
 	if (!Sprite::init())
@@ -22,11 +24,16 @@ bool Terrains::init()
 	setTexture("GamePlay/select.png");
 	setOpacity(0);
 
+	//初始化炮塔图标
 	initUI();
 
+	//为炮塔图标添加监听
 	initEvent();
+
 	return true;
 }
+
+//创建炮塔图标
 void Terrains::initUI()
 {
 	bottleIcon = Button::create("Bottle/Bottle01.png", "Bottle/Bottle01.png", "");
@@ -49,14 +56,15 @@ void Terrains::initUI()
 
 }
 
+//为炮塔添加事件监听
 void Terrains::initEvent()
 {
 	bottleIcon->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
 		if (type == ui::Widget::TouchEventType::ENDED )
 		{
 			if (GameManager::getGame()->Money >= 100) {
-				isBuilt = 1;
-				hideTowerPanleLayer();
+				isBuilt = 1;//将基座状态设为已建造
+				hideTowerPanleLayer();//隐藏选炮界面
 				auto bottle = Bottle::create();
 				bottle->setPosition(Vec2(getContentSize().width / 2, getContentSize().height / 2));
 				addChild(bottle, 0);
@@ -101,7 +109,8 @@ void Terrains::showTowerPanleLayer()
 	int money = GameManager::getGame()->Money;
 	if (isShow == false) {
 		isShow = true;
-		setOpacity(255);
+		setOpacity(255);//将图片设为完全不透明
+		//检查金钱，设置图片样式
 		if (money < 100)
 			bottleIcon->loadTextures("Bottle/bottle00.png", "Bottle/bottle00.png", "");
 		else
@@ -114,12 +123,14 @@ void Terrains::showTowerPanleLayer()
 			sunFlowerIcon->loadTextures("Flower/Flower01.png", "Flower/Flower01.png", "");
 			icedStarIcon->loadTextures("Star/Star01.png", "Star/Star01.png", "");
 		}
+		//设置炮塔图标可见
 		bottleIcon->setVisible(true);
 		sunFlowerIcon->setVisible(true);
 		icedStarIcon->setVisible(true);
 	}
 }
 
+//隐藏选炮界面
 void Terrains::hideTowerPanleLayer()
 {
 	if (isShow) {
@@ -132,6 +143,7 @@ void Terrains::hideTowerPanleLayer()
 	}
 }
 
+//对基座的图标进行变换
 void Terrains::updateTerrain(char* name) {
 
 	auto attackrange = getChildByName("attackRange");

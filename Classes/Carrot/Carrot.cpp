@@ -4,6 +4,7 @@
 USING_NS_CC;
 using namespace cocos2d::ui;
 
+//初始化萝卜的相关数据，添加元素
 bool Carrot::init() {
 
 	if (!Sprite::init())
@@ -12,12 +13,12 @@ bool Carrot::init() {
 	count = 0;
 	Life = 10;
 	isUpdateMenuShown = false;
-	this->setTexture("Carrot/hlb1_10.png");
-	life = Sprite::create("Carrot/life_10.png");
+	this->setTexture("Carrot/hlb1_10.png");             //萝卜显示
+	life = Sprite::create("Carrot/life_10.png");        //生命值显示
 	this->addChild(life);
 	life->setPosition(Vec2(80, -20));
 
-	updateButton = Button::create("Money/update_180.png");
+	updateButton = Button::create("Money/update_180.png");     //升级按钮显示
 	updateButton->setVisible(false);
 	auto size = this->getContentSize();
 	updateButton->setPosition(Vec2(size.width / 2, size.height / 2) + Vec2(0, 50));
@@ -30,6 +31,7 @@ bool Carrot::init() {
 	return true;
 }
 
+//为萝卜及其升级按钮添加监听
 void Carrot::initEvent()
 {
 	auto listener = EventListenerTouchOneByOne::create();
@@ -51,6 +53,7 @@ void Carrot::initEvent()
 
 }
 
+//升级萝卜
 void Carrot::updateCarrot()
 {
 	setLife(Life + 1);
@@ -64,6 +67,7 @@ bool Carrot::onTouchBegan(Touch* touch, Event* event)
 	return true;
 }
 
+//触摸结束时萝卜的响应
 void Carrot::onTouchEnded(Touch* touch, Event* event)
 {
 	//转换坐标系
@@ -85,6 +89,7 @@ void Carrot::onTouchEnded(Touch* touch, Event* event)
 	}
 }
 
+//显示萝卜升级图标
 void Carrot::showUpdateMenu()
 {
 	isUpdateMenuShown = true;
@@ -95,6 +100,7 @@ void Carrot::showUpdateMenu()
 		updateButton->loadTextures("Money/update_180.png", "Money/update_180.png", "");
 }
 
+/*根据当前萝卜的生命值改变萝卜的形态*/
 void Carrot::setLife(int n) {
 
 	Life = n;
@@ -110,7 +116,8 @@ void Carrot::setLife(int n) {
 
 }
 
-void Carrot::BiteCarrot(int n) {
+/*萝卜被咬后的动画*/
+void Carrot::BiteCarrot(int n) {                         //n为被咬后的生命值
 
 	char namesize[20] = { 0 };
 	auto animation = Animation::create();
@@ -122,10 +129,13 @@ void Carrot::BiteCarrot(int n) {
 	animation->setLoops(1);
 	animation->setDelayPerUnit(0.1f);
 	auto bite = Animate::create(animation);
-	runAction(Sequence::create(bite, CallFuncN::create(CC_CALLBACK_0(Carrot::setLife, this, n)), NULL));
+	runAction(Sequence::create(bite
+		, CallFuncN::create(CC_CALLBACK_0(Carrot::setLife, this, n))
+		, NULL));
 
 }
 
+/*萝卜在满血时的抖动动画*/
 void Carrot::shakeAnimation(float dt) {
 
 	if (Life >= 10) {
@@ -149,7 +159,7 @@ void Carrot::shakeAnimation(float dt) {
 		runAction(shake->clone());
 
 	}
-	else
+	else            //萝卜被咬后不再播放该动画
 		unschedule(schedule_selector(Carrot::shakeAnimation));
 
 }

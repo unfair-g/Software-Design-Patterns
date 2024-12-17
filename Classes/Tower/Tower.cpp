@@ -112,6 +112,7 @@ void BaseTower::removeAnimation() {
 
 }
 
+//展示攻击范围
 void BaseTower::showAttackRange()
 {
 	// 显示攻击范围的圆形精灵
@@ -121,6 +122,7 @@ void BaseTower::showAttackRange()
 
 }
 
+//展示升级页面
 void BaseTower::showUpdateMenu() {
 
 	isUpdateMenuShown = true;
@@ -130,6 +132,7 @@ void BaseTower::showUpdateMenu() {
 
 }
 
+//隐藏升级页面
 void BaseTower::hideUpdateMenu() {
 
 	isUpdateMenuShown = false;
@@ -177,6 +180,7 @@ float BaseTower::getAngle(Monster* monster) {
 
 }
 
+//根据金钱数展示不同图标
 void BaseTower::checkMoney(int needMoney)
 {
 	auto money = GameManager::getGame()->Money;
@@ -192,6 +196,7 @@ void BaseTower::checkMoney(int needMoney)
 	}
 }
 
+//出售防御塔
 void BaseTower::sellTower()
 {
 	auto parent = dynamic_cast<Terrains*>(getParent());
@@ -218,12 +223,7 @@ void BaseTower::addButton(int needMoney, int removeMoney)
 	//添加拆除按钮
 	sprintf(str1, "Money/remove_%d.png", removeMoney);
 	remove = Button::create(str1, str1, "");
-	if (this->getParent()->getTag() != 999 + 7 || this->getParent()->getTag() != 999 + 8)
-		remove->setPosition(position + Vec2(0, -70));
-	else if (this->getParent()->getTag() == 999 + 7)
-		remove->setPosition(position + Vec2(-70, 0));
-	else
-		remove->setPosition(position + Vec2(70, 0));
+	remove->setPosition(position + Vec2(0, -70));
 	remove->setPressedActionEnabled(true);
 	remove->setVisible(false);
 	nowScene->addChild(remove, 3);
@@ -394,6 +394,7 @@ void Bottle::initEvent()
 
 }
 
+//升级防御塔，更新数据
 void Bottle::updateTower()
 {
 	if (level == 1) {
@@ -498,6 +499,7 @@ void Flower::initData()
 	GameManager::getGame()->Money -= buildMoney;
 }
 
+//太阳花的升级
 void Flower::updateTower()
 {
 

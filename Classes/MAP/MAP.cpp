@@ -7,24 +7,27 @@
 USING_NS_CC;
 using namespace cocos2d::ui;
 
-/*初始化怪物*/
+/*加载一波怪物*/
 void MAP::addWaves(float dt) {
-
+	//当前波数小于最大波数且一波结束且上一波怪物全部消灭
 	if (wave < maxWave - 1 && IsEnd && GameManager::getGame()->currentMonster.size() == 0) {
-		IsStart = true;
-		IsEnd = false;
+		IsEnd = false;           
 		wave++;
+		//显示当前波数
 		setNumber((wave + 1) / 10, number_5, yellow);
 		setNumber((wave + 1) % 10, number_6, yellow);
+
 		if (wave == 0)
-			schedule(schedule_selector(MAP::addMonsters), 1.0f, waveMonster.at(wave).size(), 0);
+			schedule(schedule_selector(MAP::addMonsters), 1.0f, waveMonster.at(wave).size(), 0);        //第一波立马加载怪物
 		else
-			schedule(schedule_selector(MAP::addMonsters), 1.0f, waveMonster.at(wave).size(), 3.0f);
+			schedule(schedule_selector(MAP::addMonsters), 1.0f, waveMonster.at(wave).size(), 3.0f);     //后续每波等待三秒加载怪物
 	}
 
 }
 
+/*加载单个怪物*/
 void MAP::addMonsters(float dt) {
+	
 	if (MonsterNum < waveMonster.at(wave).size()) {
 		Monster* monster = NULL;
 		switch (waveMonster.at(wave).at(MonsterNum)) {
@@ -41,9 +44,9 @@ void MAP::addMonsters(float dt) {
 			break;
 		}
 		monster->setPosition(begin);
-		monster->setMaxhp(monster->getMaxhp() + 50 * wave);
+		monster->setMaxhp(monster->getMaxhp() + 50 * wave);          //随着波数增加怪物生命值增加
 		monster->setHp(monster->getMaxhp());
-		monster->setspeed(monster->getspeed() + 2 * wave);
+		monster->setspeed(monster->getspeed() + 2 * wave);           //随着波数增加怪物速度增加
 		addChild(monster);
 		GameManager::getGame()->currentMonster.pushBack(monster);
 		MonsterNum++;
@@ -54,6 +57,7 @@ void MAP::addMonsters(float dt) {
 	}
 }
 
+/*在怪物死亡的位置显示增加钱数*/
 void MAP::addMoney(int money, Vec2 pos) {
 
 	char namesize[30] = { 0 };
@@ -67,6 +71,7 @@ void MAP::addMoney(int money, Vec2 pos) {
 
 }
 
+/*在对应位置显示数字*/
 void MAP::setNumber(int num, Sprite* pos, int color) {
 
 	pos->setVisible(true);
@@ -79,15 +84,16 @@ void MAP::setNumber(int num, Sprite* pos, int color) {
 
 }
 
+/*刷新生命值和钱数*/
 void MAP::update(float dt) {
 
-	int money = GameManager::getGame()->Money;
+	int money = GameManager::getGame()->Money;           
 	currentLife = GameManager::getGame()->Life;
 
 	if (currentLife <= 0)
-		GameOver(false);
+		GameOver(false);             //萝卜死亡，调用失败结算界面
 	else if (wave == maxWave - 1 && IsEnd && GameManager::getGame()->currentMonster.empty())
-		GameOver(true);
+		GameOver(true);              //游戏胜利，调用成功结算界面
 
 	if (money >= 10000) {
 		setNumber(9, number_1);
@@ -122,14 +128,15 @@ void MAP::update(float dt) {
 
 	if (currentLife != lastLife) {
 		if (currentLife < lastLife)
-			carrot->BiteCarrot(currentLife);
+			carrot->BiteCarrot(currentLife);         //被咬则播放动画
 		else
-			carrot->setLife(currentLife);
+			carrot->setLife(currentLife);            //升级
 		lastLife = currentLife;
 	}
 
 }
 
+/*初始化地图*/
 void MAP::InitMap() {
 
 	MonsterNum = 0;
@@ -138,7 +145,6 @@ void MAP::InitMap() {
 
 	wave = -1;
 
-	IsStart = false;
 	IsEnd = true;
 
 	Corner = tiledmap->getObjectGroup("Corner");
@@ -156,12 +162,13 @@ void MAP::InitMap() {
 
 	beginAnimation();
 
-	auto touchLayer = TouchLayer::createTouchLayer();
+	auto touchLayer = TouchLayer::createTouchLayer();          //创建触摸层
 	addChild(touchLayer);
 
 	SoundManager::StopBackgroundMusic();
 }
 
+/*开头倒计时动画*/
 void MAP::Count(int i) {
 
 	auto fadein = FadeIn::create(0);
@@ -186,12 +193,13 @@ void MAP::Count(int i) {
 		number->runAction(Sequence::create(oneCount, CallFuncN::create(CC_CALLBACK_0(MAP::Count, this, --i)), NULL));
 	}
 	else {
-		schedule(schedule_selector(MAP::addWaves), 1.0f);
+		schedule(schedule_selector(MAP::addWaves), 1.0f);           //倒计时结束后一秒加载第一波怪物
 		getChildByName("BG")->removeFromParent();
 		SoundManager::PlayMapMusic();
 	}
 }
 
+/*播放开始动画*/
 void MAP::beginAnimation() {
 
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -318,7 +326,7 @@ void MAP::InitEvent() {
 		});
 }
 
-
+/*初始化数字*/
 void MAP::InitNumber() {
 
 	int x, y;
@@ -368,7 +376,7 @@ void MAP::InitNumber() {
 	setNumber(0, number_6, yellow);
 	addChild(number_6, 1);
 
-	ValueMap num7 = Number->getObject("number_7");
+	ValueMap num7 = Number->getObject("number_7");          //怪物总波数十位
 	x = num7["x"].asFloat();
 	y = num7["y"].asFloat();
 	auto number_7 = Sprite::create();
@@ -376,7 +384,7 @@ void MAP::InitNumber() {
 	addChild(number_7);
 	setNumber(maxWave / 10, number_7);
 
-	ValueMap num8 = Number->getObject("number_8");
+	ValueMap num8 = Number->getObject("number_8");         //怪物总波数个位
 	x = num8["x"].asFloat();
 	y = num8["y"].asFloat();
 	auto number_8 = Sprite::create();
@@ -385,20 +393,21 @@ void MAP::InitNumber() {
 	setNumber(maxWave % 10, number_8);
 }
 
+/*调用游戏结算菜单*/
 void::MAP::GameOver(bool win) {
 
-	unscheduleAllCallbacks();
+	unscheduleAllCallbacks();        //停止所有调度器
 
 	auto monsters = GameManager::getGame()->currentMonster;
-	if (!monsters.empty()) {
+	if (!monsters.empty()) {              //停止所有怪物的移动
 		for (Vector<Monster*>::iterator it = monsters.begin(); it != monsters.end(); it++)
 			(*it)->stopAllActions();
 	}
 
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	SoundManager::PlayResultMusic(win);
-	auto menu = OverMenu::createMenu(win, maxWave, wave);
+	SoundManager::PlayResultMusic(win);   //播放胜利音效
+	auto menu = OverMenu::createMenu(win, maxWave, wave);         //根据游戏结果创建结算菜单
 
 	addChild(menu, 5);
 

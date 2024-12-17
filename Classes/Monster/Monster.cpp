@@ -18,6 +18,7 @@ Monster* Monster::createMonster() {
 	return Monster::create();
 }
 
+/*装载移动路径*/
 void Monster::loadPoint() {
 	Vec2 birthPlace = static_cast<MAP*>(Director::getInstance()->getRunningScene())->getBirthPlace();
 	const std::vector<Point>& corner = static_cast<MAP*>(Director::getInstance()->getRunningScene())->getCorner();
@@ -33,6 +34,8 @@ void Monster::loadPoint() {
 	}
 	current = birthPlace;
 }
+
+/*初始化触摸响应事件*/
 void Monster::InitEvent() {
 
 	auto listener = EventListenerTouchOneByOne::create();
@@ -47,19 +50,20 @@ bool Monster::onTouchBegan(Touch* touch, Event* event)
 	return true;
 }
 
+/*接收触摸事件*/
 void Monster::onTouchEnded(Touch* touch, Event* event)
 {
 	Point locationInNode = convertTouchToNodeSpace(touch);
 	Size size = getContentSize();
 	Rect rect = Rect(0, 0, size.width, size.height);
-	if (rect.containsPoint(locationInNode)) {
-		if (chosen)
+	if (rect.containsPoint(locationInNode)) {           //被点到，选中或取消选中
+		if (chosen)                 
 			chosen = false;
 		else
 			chosen = true;
 	}
-	else {
-		auto monsters = GameManager::getGame()->currentMonster;
+	else {                                              //未被点到，点到其他怪物时取消选中
+		auto monsters = GameManager::getGame()->currentMonster;        
 		Vector<Monster*>::iterator it = monsters.begin();
 		for (; it != monsters.end(); it++) {
 			auto loc = (*it)->convertTouchToNodeSpace(touch);
@@ -88,6 +92,7 @@ bool Monster::init() {
 	return true;
 }
 
+/*初始化血条*/
 void Monster::InitHpbar() {
 
 	hpbar_bg = Sprite::create("Monster/hpbar_bg.png");
@@ -104,6 +109,7 @@ void Monster::InitHpbar() {
 
 }
 
+/*出生动画*/
 void Monster::birthAnimation() {
 
 	auto animation = Animation::create();
@@ -124,10 +130,12 @@ void Monster::birthAnimation() {
 
 }
 
+/*死亡动画*/
 void Monster::killAnimation() {
-	stopAllActions();
-	removeAllChildrenWithCleanup(true);
-	GameManager::getGame()->Money += money;
+
+	stopAllActions();                             //停止所有动作
+	removeAllChildrenWithCleanup(true);           //将怪物的血条移除
+	GameManager::getGame()->Money += money;       //返回金币
 
 	auto killed = Animation::create();
 
@@ -141,15 +149,18 @@ void Monster::killAnimation() {
 	killed->setDelayPerUnit(0.1f);
 
 	auto smoke = Animate::create(killed);
-
+	
+	//先播放死亡动画，然后加钱，最后将怪物从场景中移除
 	runAction(Sequence::create(smoke,
 		CallFuncN::create(CC_CALLBACK_0(MAP::addMoney,static_cast<MAP*>(Director::getInstance()->getRunningScene()), money, getPosition())),
 		CallFuncN::create(CC_CALLBACK_0(Monster::removeFromParent, this)), NULL));
-	SoundManager::PlayMonsterMusic();
-	GameManager::getGame()->currentMonster.eraseObject(this);
+
+	SoundManager::PlayMonsterMusic();                                   //播放怪物死亡音效
+	GameManager::getGame()->currentMonster.eraseObject(this);          //从当前怪物中移除
 
 }
 
+/*获取下一个位置*/
 Vec2 Monster::nextPoint() {
 	auto maxCount = next.size();
 	pointCounter++;
@@ -160,12 +171,14 @@ Vec2 Monster::nextPoint() {
 	return current;
 }
 
+/*翻转血条*/
 void Monster::reverseHpbar() {
 
 	hpbar_bg->runAction(ScaleBy::create(0, -1, 1));
 
 }
 
+/*移动到下一个坐标*/
 void Monster::runNextPoint() {
 
 
@@ -174,7 +187,7 @@ void Monster::runNextPoint() {
 	if (tmp != current) {
 		auto duration = current.getDistance(tmp) / speed;
 		
-		if (abs(tmp.x - current.x) > walklong && pointCounter > 1) {
+		if (abs(tmp.x - current.x) > walklong && pointCounter > 1) {                      //当移动到拐角时，怪物翻转
 			runAction(Sequence::create(MoveTo::create(duration, tmp)
 				,ScaleBy::create(0.1f, -1, 1)
 				,CallFuncN::create(CC_CALLBACK_0(Monster::reverseHpbar,this))
@@ -195,17 +208,18 @@ void Monster::runNextPoint() {
 	}
 }
 
+/*接收伤害*/
 void Monster::getHurt(int hurt, state effect) {
 
 	Hp -= hurt;
 
 	if (Hp <= 0) {
-		State = Death;
+		State = Death;              //血量小于等于0时设置死亡状态
 	}
-	else {
+	else {                          //更新血条状态
 
 		hpbar->setPercentage((Hp / maxHp) * 100);
-		State = effect;
+		State = effect;             //设置攻击影响
 
 	}
 
@@ -248,6 +262,7 @@ bool NormalMonster::init() {
 	return true;
 }
 
+/*被攻击的动画*/
 void Monster::attackAnimation() {
 
 	char namesize[30] = { 0 };
@@ -261,12 +276,12 @@ void Monster::attackAnimation() {
 		auto delay = DelayTime::create(0);
 
 		switch (State) {
-		case(Boom):
+		case(Boom):                                                       //爆炸特效
 			animation->addSpriteFrameWithFile("Bottle/Boom1.png");
 			animation->addSpriteFrameWithFile("Bottle/Boom2.png");
 			animation->setDelayPerUnit(0.05f);
-			break;
-		case(Burn):
+			break; 
+		case(Burn):                                                       //燃烧特效
 			for (int i = 1; i <= 3; i++) {
 				sprintf(namesize, "Flower/Burn%d.png", i);
 				animation->addSpriteFrameWithFile(namesize);
@@ -274,12 +289,12 @@ void Monster::attackAnimation() {
 			animation->setDelayPerUnit(0.1f);
 			delay->setDuration(0.5f);
 			break;
-		case(IceBoom):
+		case(IceBoom):                                                    //冰星星群体伤害特效
 			for (int i = 1; i <= 3; i++) {
 				sprintf(namesize, "Star/star%d.png", i);
 				animation->addSpriteFrameWithFile(namesize);
 			}
-		case(Ice):
+		case(Ice):                                                        //减速特效
 			speed = slowspeed;
 			animation->addSpriteFrameWithFile("Star/Ice.png");
 			animation->setDelayPerUnit(0.1f);
@@ -297,6 +312,7 @@ void Monster::attackAnimation() {
 
 		auto attack = Animate::create(animation);
 
+		/*先播放被攻击动画，然后将动画移除，将effct取消，恢复普通状态*/
 		effect->runAction(Sequence::create(attack
 			, delay
 			, CallFuncN::create(CC_CALLBACK_0(Sprite::removeFromParent, effect))
@@ -308,9 +324,10 @@ void Monster::attackAnimation() {
 
 }
 
-/*怪物的多种状态*/
+/*刷新怪物的状态*/
 void Monster::update(float dt) {
 
+	/*是否被选中*/
 	if (chosen && getChildByName("target") == NULL) {
 		auto target = Sprite::create("MONSTER/chosen.png");
 		target->setPosition(getContentSize().width / 2 - 2, height + 5);
@@ -321,24 +338,24 @@ void Monster::update(float dt) {
 		removeChildByName("target");
 
 	switch (State) {
-	case(Bite):
-		SoundManager::PlayBiteMusic();
-		GameManager::getGame()->Life--;
+	case(Bite):                                                          //咬到萝卜
+		SoundManager::PlayBiteMusic();                                   //播放对应音效
+		GameManager::getGame()->Life--;                                  //萝卜生命值减一
 		GameManager::getGame()->currentMonster.eraseObject(this);
-		unscheduleUpdate();
+		unscheduleUpdate();                                              //取消刷新
 		removeFromParentAndCleanup(true);
 		break;
-	case(Death):
-		killAnimation();
+	case(Death):                                                         //死亡
+		killAnimation();        
 		unscheduleUpdate();
 		break;
-	case(Boom):
+	case(Boom):                                                          //三种不同的被攻击特效
 	case(Burn):
 	case(Ice):
 	case(IceBoom):
 		attackAnimation();
 		break;
-	case(None):
+	case(None):                                                          //普通状态
 		if (speed < normalspeed && !IsEffect)
 			speed = normalspeed;
 		break;

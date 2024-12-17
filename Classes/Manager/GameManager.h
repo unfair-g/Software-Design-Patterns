@@ -8,32 +8,30 @@
 class GameManager {
 public:
 
-	static GameManager* getGame();
+	static GameManager* getGame();                 //获取当前游戏的信息
 
 	void init();
 
-	void setResult();
+	void setResult();                             //设置本局游戏的结果
 
-	int getResult(int level);
+	int getResult(int level) const;                     //获得对应关卡的结果
 
 	GameManager();
 
 	~GameManager();
 
-	cocos2d::Vector<Monster*> currentMonster;
+	cocos2d::Vector<Monster*> currentMonster;            //当前游戏存活的怪物
 
-	cocos2d::Vector<BaseTower*> currentTower;
+	int Money;                                    //当前游戏的钱数
 
-	int Money;
+	int Life;                                     //当前游戏萝卜的生命值
 
-	int Life;
+	int currentLevel;                             //当前关卡数
 
-	int currentLevel;
-
-	int maxLevel;
+	int maxLevel;                                 //最大关卡数
 
 public:
 
-	int level[2];       //记录关卡是否胜利
+	int level[2];                                 //记录关卡是否胜利
 
 };

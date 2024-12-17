@@ -3,6 +3,7 @@
 #include"Monster/Monster.h"
 USING_NS_CC;
 
+/*子弹的基类*/
 class Bullet : public Sprite
 {
 public:
@@ -13,12 +14,13 @@ protected:
 
 	virtual bool init();
 
-	int speed;
+	int speed;              //子弹飞行速度
 
-	virtual void shoot() {};//攻击
+	virtual void shoot() {};//子弹攻击动画
 
 };
 
+/*瓶子炮的子弹类*/
 class BottleBullet :public Bullet {
 public:
 	bool init();
@@ -26,6 +28,7 @@ public:
 	void shoot(int level);
 };
 
+/*冰星星的子弹类*/
 class StarBullet :public Bullet {
 public:
 	bool init();

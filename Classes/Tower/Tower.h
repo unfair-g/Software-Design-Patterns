@@ -24,7 +24,7 @@ public:
 
 	void checkMoney(int neddMoney);
 
-	void addButton(int needMoney, int removeMoney);
+	void addButton(int needMoney, int removeMoney);//添加塔的升级和拆除按钮
 	virtual void sellTower();//出售防御塔
 	virtual bool init();                   //初始化防御塔
 	virtual void initEvent() { }
@@ -44,7 +44,6 @@ public:
 	CC_SYNTHESIZE(int, updateMoney, UpdateMoney);//升级所需金钱
 	CC_SYNTHESIZE(int, sellMoney, sellMoney);//售卖金钱
 
-	virtual void showTowerInfo(){}
 	bool isUpdateMenuShown;
 
 protected:

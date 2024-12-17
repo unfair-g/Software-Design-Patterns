@@ -5,6 +5,7 @@
 #include"MAP/DesertMap.h"
 #include"MAP/SkyMap.h"
 
+/*游戏内菜单*/
 class ChooseMenu :public cocos2d::Layer {
 public:
 	static cocos2d::Layer* createLayer();
@@ -17,11 +18,11 @@ private:
 
 	void InitEvent();
 
-	cocos2d::ui::Button* restartButton;
-	//cocos2d::ui::Button* continueButton;
-	cocos2d::ui::Button* returnButton;
+	cocos2d::ui::Button* restartButton;             //重新开始按钮
+	cocos2d::ui::Button* returnButton;              //返回选关界面按钮
 };
 
+/*结算菜单*/
 class OverMenu :public cocos2d::Layer {
 public:
 	static cocos2d::Layer* createMenu(bool IsWin,int max,int current);
@@ -29,20 +30,21 @@ public:
 	CREATE_FUNC(OverMenu);
 
 private:
-	bool Win;
+	bool Win;                                 //是否胜利
 
-	int maxWave;
+	int maxWave;                              //最大波数
 
-	int wave;
+	int wave;                                 //当前波数
 
-	cocos2d::ui::Button* returnButton;
-	cocos2d::ui::Button* continueButton;
+	cocos2d::ui::Button* returnButton;        //返回选关界面按钮
+	cocos2d::ui::Button* continueButton;      //继续游戏按钮
 
 	bool InitMenu();
 
 	void InitUI();
 
-	void Result();
+	void Result();                           //设置游戏结果
 
 	void InitEvent();
+
 };

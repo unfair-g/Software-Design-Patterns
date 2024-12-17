@@ -1,6 +1,7 @@
 #include "Bullet/Bullet.h"
 #include "MAP/MAP.h"
 #include"Manager/GameManager.h"
+
 bool Bullet::init()
 {
 	if (!Sprite::init())
@@ -11,13 +12,14 @@ bool Bullet::init()
 
 bool BottleBullet::init() {
 
-	if (!Sprite::init())
+	if (!Bullet::init())
 		return false;
 
 	return true;
 
 }
 
+/*Æ¿×ÓÅÚ×Óµ¯µÄ¹¥»÷¶¯»­*/
 void BottleBullet::shoot(int level) {
 	
 	auto animation = Animation::create();
@@ -44,6 +46,7 @@ bool StarBullet::init() {
 	return true;
 }
 
+/*±ùÐÇÐÇ×Óµ¯µÄ¹¥»÷¶¯»­*/
 void StarBullet::shoot(int level) {
 
 	char namesize[30] = { 0 };
