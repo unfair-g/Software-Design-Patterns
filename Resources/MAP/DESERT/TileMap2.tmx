@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="left-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="10" nextobjectid="114">
+ <tileset firstgid="1" name="BG" tilewidth="64" tileheight="64" tilecount="144" columns="16">
+  <image source="BG2.png" width="1024" height="576"/>
+ </tileset>
+ <tileset firstgid="145" name="Path" tilewidth="64" tileheight="64" tilecount="128" columns="16">
+  <image source="Path2.png" width="1024" height="512"/>
+ </tileset>
+ <tileset firstgid="273" name="upconsole" tilewidth="64" tileheight="64" tilecount="16" columns="16">
+  <image source="../SKY/upconsole.png" width="1024" height="64"/>
+ </tileset>
+ <tileset firstgid="289" name="birth" tilewidth="64" tileheight="51" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="64" height="51" source="birth.png"/>
+  </tile>
+ </tileset>
+ <tileset firstgid="290" name="items" tilewidth="64" tileheight="64" tilecount="36" columns="18">
+  <image source="items.png" width="1152" height="128"/>
+ </tileset>
+ <tileset firstgid="326" name="TEXT" tilewidth="212" tileheight="47" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="212" height="47" source="../TEXT.png"/>
+  </tile>
+ </tileset>
+ <layer id="1" name="BG" width="16" height="9">
+  <data encoding="base64">
+   AQAAAAIAAAADAAAABAAAAAUAAAAGAAAABwAAAAgAAAAJAAAACgAAAAsAAAAMAAAADQAAAA4AAAAPAAAAEAAAABEAAAASAAAAEwAAABQAAAAVAAAAFgAAABcAAAAYAAAAGQAAABoAAAAbAAAAHAAAAB0AAAAeAAAAHwAAACAAAAAhAAAAIgAAACMAAAAkAAAAJQAAACYAAAAnAAAAKAAAACkAAAAqAAAAKwAAACwAAAAtAAAALgAAAC8AAAAwAAAAMQAAADIAAAAzAAAANAAAADUAAAA2AAAANwAAADgAAAA5AAAAOgAAADsAAAA8AAAAPQAAAD4AAAA/AAAAQAAAAEEAAABCAAAAQwAAAEQAAABFAAAARgAAAEcAAABIAAAASQAAAEoAAABLAAAATAAAAE0AAABOAAAATwAAAFAAAABRAAAAUgAAAFMAAABUAAAAVQAAAFYAAABXAAAAWAAAAFkAAABaAAAAWwAAAFwAAABdAAAAXgAAAF8AAABgAAAAYQAAAGIAAABjAAAAZAAAAGUAAABmAAAAZwAAAGgAAABpAAAAagAAAGsAAABsAAAAbQAAAG4AAABvAAAAcAAAAHEAAAByAAAAcwAAAHQAAAB1AAAAdgAAAHcAAAB4AAAAeQAAAHoAAAB7AAAAfAAAAH0AAAB+AAAAfwAAAIAAAACBAAAAggAAAIMAAACEAAAAhQAAAIYAAACHAAAAiAAAAIkAAACKAAAAiwAAAIwAAACNAAAAjgAAAI8AAACQAAAA
+  </data>
+ </layer>
+ <layer id="2" name="path" width="16" height="9">
+  <data encoding="base64">
+   AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAACSAAAAkwAAAJQAAACVAAAAlgAAAJcAAACYAAAAmQAAAJoAAACbAAAAnAAAAJ0AAACeAAAAnwAAAKAAAAChAAAAogAAAKMAAACkAAAApQAAAKYAAACnAAAAqAAAAKkAAACqAAAAqwAAAKwAAACtAAAArgAAAK8AAACwAAAAsQAAALIAAACzAAAAtAAAALUAAAC2AAAAtwAAALgAAAC5AAAAugAAALsAAAC8AAAAvQAAAL4AAAC/AAAAwAAAAMEAAADCAAAAwwAAAMQAAADFAAAAxgAAAMcAAADIAAAAyQAAAMoAAADLAAAAzAAAAM0AAADOAAAAzwAAANAAAADRAAAA0gAAANMAAADUAAAA1QAAANYAAADXAAAA2AAAANkAAADaAAAA2wAAANwAAADdAAAA3gAAAN8AAADgAAAA4QAAAOIAAADjAAAA5AAAAOUAAADmAAAA5wAAAOgAAADpAAAA6gAAAOsAAADsAAAA7QAAAO4AAADvAAAA8AAAAPEAAADyAAAA8wAAAPQAAAD1AAAA9gAAAPcAAAD4AAAA+QAAAPoAAAD7AAAA/AAAAP0AAAD+AAAA/wAAAAABAAABAQAAAgEAAAMBAAAEAQAABQEAAAYBAAAHAQAACAEAAAkBAAAKAQAACwEAAAwBAAANAQAADgEAAA8BAAAQAQAA
+  </data>
+ </layer>
+ <layer id="3" name="Upconsole" width="16" height="9">
+  <data encoding="base64">
+   EQEAABIBAAATAQAAFAEAABUBAAAWAQAAFwEAABgBAAAZAQAAGgEAABsBAAAcAQAAHQEAAB4BAAAfAQAAIAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+  </data>
+ </layer>
+ <layer id="5" name="barrier" width="16" height="9">
+  <data encoding="base64">
+   AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQgEAYAAAAAAiAQAAIwEAAEMBAAAAAAAAMAEAAAAAAABCAQBgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANAEAADUBAAAAAAAARQEAYAAAAABCAQBgAAAAACQBAAAlAQAAJgEAACcBAAAoAQAAAAAAAAAAAAAkAQAAJQEAACYBAAAnAQAAKAEAACkBAAAqAQAAKwEAAAAAAAA2AQAANwEAADgBAAA5AQAAOgEAAAAAAAAAAAAANgEAADcBAAA4AQAAOQEAADoBAAA7AQAAPAEAAD0BAAAiAQAAIwEAAEUBAGAAAAAAIgEAACMBAAAAAAAAAAAAAAAAAAAAAAAAMAEAAAAAAAAAAAAARQEAYAAAAAAAAAAANAEAADUBAAAAAAAAMAEAADQBAAA1AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQwEAAAAAAABCAQBgIgEAACMBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQBAAA1AQAAAAAAAAAAAAAwAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+  </data>
+ </layer>
+ <objectgroup id="6" name="Corner"/>
+ <objectgroup id="7" name="Point">
+  <object id="38" name="p1" x="162" y="99">
+   <ellipse/>
+  </object>
+  <object id="39" name="p2" x="202" y="99">
+   <ellipse/>
+  </object>
+  <object id="40" name="p3" x="242" y="99">
+   <ellipse/>
+  </object>
+  <object id="41" name="p4" x="282" y="99">
+   <ellipse/>
+  </object>
+  <object id="42" name="p5" x="322" y="99">
+   <ellipse/>
+  </object>
+  <object id="43" name="p6" x="362" y="99">
+   <ellipse/>
+  </object>
+  <object id="44" name="p7" x="402" y="99">
+   <ellipse/>
+  </object>
+  <object id="45" name="p8" x="442" y="99">
+   <ellipse/>
+  </object>
+  <object id="86" name="p9" x="475" y="99">
+   <ellipse/>
+  </object>
+  <object id="46" name="p10" x="475" y="139">
+   <ellipse/>
+  </object>
+  <object id="47" name="p11" x="475" y="179">
+   <ellipse/>
+  </object>
+  <object id="48" name="p12" x="475" y="219">
+   <ellipse/>
+  </object>
+  <object id="50" name="p13" x="475" y="259">
+   <ellipse/>
+  </object>
+  <object id="51" name="p14" x="475" y="299">
+   <ellipse/>
+  </object>
+  <object id="52" name="p15" x="475" y="339">
+   <ellipse/>
+  </object>
+  <object id="53" name="p16" x="475" y="379">
+   <ellipse/>
+  </object>
+  <object id="55" name="p17" x="475" y="419">
+   <ellipse/>
+  </object>
+  <object id="87" name="p18" x="475" y="445">
+   <ellipse/>
+  </object>
+  <object id="67" name="p19" x="515" y="445">
+   <ellipse/>
+  </object>
+  <object id="68" name="p20" x="555" y="445">
+   <ellipse/>
+  </object>
+  <object id="69" name="p21" x="595" y="445">
+   <ellipse/>
+  </object>
+  <object id="70" name="p22" x="635" y="445">
+   <ellipse/>
+  </object>
+  <object id="71" name="p23" x="675" y="445">
+   <ellipse/>
+  </object>
+  <object id="72" name="p24" x="715" y="445">
+   <ellipse/>
+  </object>
+  <object id="73" name="p25" x="755" y="445">
+   <ellipse/>
+  </object>
+  <object id="74" name="p26" x="795" y="445">
+   <ellipse/>
+  </object>
+  <object id="75" name="p27" x="835" y="445">
+   <ellipse/>
+  </object>
+  <object id="76" name="p28" x="875" y="445">
+   <ellipse/>
+  </object>
+  <object id="77" name="p29" x="915" y="445">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup id="9" name="Tower">
+  <object id="103" name="Tower1" x="160" y="176">
+   <ellipse/>
+  </object>
+  <object id="104" name="Tower2" x="545" y="165">
+   <ellipse/>
+  </object>
+  <object id="105" name="Tower3" x="549" y="364">
+   <ellipse/>
+  </object>
+  <object id="106" name="Tower4" x="608" y="365">
+   <ellipse/>
+  </object>
+  <object id="107" name="Tower8" x="474" y="526">
+   <ellipse/>
+  </object>
+  <object id="108" name="Tower9" x="544" y="526">
+   <ellipse/>
+  </object>
+  <object id="111" name="Tower7" x="772" y="369">
+   <ellipse/>
+  </object>
+  <object id="112" name="Tower5" x="607" y="97">
+   <ellipse/>
+  </object>
+  <object id="113" name="Tower6" x="605" y="166">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup id="4" name="Object">
+  <object id="3" name="carrot" x="950.667" y="445">
+   <ellipse/>
+  </object>
+  <object id="4" name="menuButton" x="925" y="30">
+   <ellipse/>
+  </object>
+  <object id="5" name="stopButton" x="801" y="33">
+   <ellipse/>
+  </object>
+  <object id="6" name="birth" x="122" y="99">
+   <ellipse/>
+  </object>
+  <object id="79" name="text" x="500" y="33">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup id="8" name="Number">
+  <object id="81" name="number_1" x="100" y="25">
+   <ellipse/>
+  </object>
+  <object id="82" name="number_2" x="118" y="25">
+   <ellipse/>
+  </object>
+  <object id="83" name="number_3" x="136" y="25">
+   <ellipse/>
+  </object>
+  <object id="84" name="number_4" x="154" y="25">
+   <ellipse/>
+  </object>
+  <object id="94" name="number_5" x="427" y="31">
+   <ellipse/>
+  </object>
+  <object id="95" name="number_6" x="460" y="30">
+   <ellipse/>
+  </object>
+  <object id="96" name="number_7" x="510" y="30">
+   <ellipse/>
+  </object>
+  <object id="97" name="number_8" x="527" y="30">
+   <ellipse/>
+  </object>
+ </objectgroup>
+</map>
