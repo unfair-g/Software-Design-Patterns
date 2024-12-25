@@ -3,8 +3,8 @@
 #include"MAP/DesertMap.h"
 USING_NS_CC;
 using namespace cocos2d::ui;
-
-static GameManager* instance;
+//Refactored with Bridge Pattern
+GameManager* GameManager::gameManager = nullptr;
 
 /*构造函数*/
 GameManager::GameManager() {
@@ -27,12 +27,13 @@ void GameManager::init() {
 }
 
 /*取当前游戏*/
+// Refactored with Singleton Pattern
 GameManager* GameManager::getGame() {
 
-	if (instance == NULL)                   //无实例时创建一个示例
-		instance = new GameManager();
+	if (gameManager == nullptr)                   //无实例时创建一个示例
+		gameManager = new GameManager();
 
-	return instance;
+	return gameManager;
 
 }
 
@@ -61,5 +62,5 @@ int GameManager::getResult(int currentlevel) const{
 
 /*回收内存*/
 GameManager::~GameManager() {
-	delete instance;
+	delete gameManager;
 }

@@ -19,8 +19,11 @@ bool Terrains::init()
 		return false;
 	}
 
-	isShow = false;
-	isBuilt = false;
+	//Refactored with State Pattern
+	this->TransitionTo(new TerrainUnbuiltState);
+
+	state->setIsShow(false);
+
 	setTexture("GamePlay/select.png");
 	setOpacity(0);
 
@@ -31,6 +34,14 @@ bool Terrains::init()
 	initEvent();
 
 	return true;
+}
+
+//Refactored with State Pattern
+void Terrains::TransitionTo(TerrainState* st) {
+	if (this->state != nullptr)
+		delete this->state;
+	this->state = st;
+	this->state->setContext(this);
 }
 
 //创建炮塔图标
@@ -63,8 +74,10 @@ void Terrains::initEvent()
 		if (type == ui::Widget::TouchEventType::ENDED )
 		{
 			if (GameManager::getGame()->Money >= 100) {
-				isBuilt = 1;//将基座状态设为已建造
-				hideTowerPanleLayer();//隐藏选炮界面
+				//Refactored with State Pattern
+				hideInfo();//隐藏选炮界面
+				TransitionTo(new TerrainBuiltState);//将基座状态设为已建造
+				//End
 				auto bottle = Bottle::create();
 				bottle->setPosition(Vec2(getContentSize().width / 2, getContentSize().height / 2));
 				addChild(bottle, 0);
@@ -78,8 +91,10 @@ void Terrains::initEvent()
 		if (type == ui::Widget::TouchEventType::ENDED)
 		{
 			if (GameManager::getGame()->Money >= 180) {
-				isBuilt = 1;
-				hideTowerPanleLayer();
+				//Refactored with State Pattern
+				hideInfo();
+				TransitionTo(new TerrainBuiltState);//将基座状态设为已建造
+				//End
 				auto flower = Flower::create();
 				flower->setPosition(Vec2(25, 23));
 				addChild(flower, -1);
@@ -93,8 +108,10 @@ void Terrains::initEvent()
 		if (type == ui::Widget::TouchEventType::ENDED)
 		{
 			if (GameManager::getGame()->Money >= 180) {
-				isBuilt = 1;
-				hideTowerPanleLayer();
+				//Refactored with State Pattern
+				hideInfo();
+				TransitionTo(new TerrainBuiltState);//将基座状态设为已建造
+				//End
 				auto star = Star::create();
 				star->setPosition(Vec2(36, 36));
 				addChild(star, 0);
@@ -104,42 +121,43 @@ void Terrains::initEvent()
 		});
 }
 
-void Terrains::showTowerPanleLayer()
+//Refactored with State Pattern
+void TerrainUnbuiltState::showInfo()
 {
 	int money = GameManager::getGame()->Money;
-	if (isShow == false) {
-		isShow = true;
-		setOpacity(255);//将图片设为完全不透明
+	if (this->getIsShow() == false) {
+		setIsShow(true);
+		auto context = getContext();
+		context->setOpacity(255);//将图片设为完全不透明
 		//检查金钱，设置图片样式
 		if (money < 100)
-			bottleIcon->loadTextures("Bottle/bottle00.png", "Bottle/bottle00.png", "");
+			context->bottleIcon->loadTextures("Bottle/bottle00.png", "Bottle/bottle00.png", "");
 		else
-			bottleIcon->loadTextures("Bottle/bottle01.png", "Bottle/bottle01.png", "");
+			context->bottleIcon->loadTextures("Bottle/bottle01.png", "Bottle/bottle01.png", "");
 		if (money < 180) {
-			sunFlowerIcon->loadTextures("Flower/Flower00.png", "Flower/Flower00.png", "");
-			icedStarIcon->loadTextures("Star/Star02.png", "Star/Star02.png", "");
+			context->sunFlowerIcon->loadTextures("Flower/Flower00.png", "Flower/Flower00.png", "");
+			context->icedStarIcon->loadTextures("Star/Star02.png", "Star/Star02.png", "");
 		}
 		else {
-			sunFlowerIcon->loadTextures("Flower/Flower01.png", "Flower/Flower01.png", "");
-			icedStarIcon->loadTextures("Star/Star01.png", "Star/Star01.png", "");
+			context->sunFlowerIcon->loadTextures("Flower/Flower01.png", "Flower/Flower01.png", "");
+			context->icedStarIcon->loadTextures("Star/Star01.png", "Star/Star01.png", "");
 		}
 		//设置炮塔图标可见
-		bottleIcon->setVisible(true);
-		sunFlowerIcon->setVisible(true);
-		icedStarIcon->setVisible(true);
+		context->bottleIcon->setVisible(true);
+		context->sunFlowerIcon->setVisible(true);
+		context->icedStarIcon->setVisible(true);
 	}
 }
 
-//隐藏选炮界面
-void Terrains::hideTowerPanleLayer()
+////Refactored with State Pattern
+void TerrainUnbuiltState::hideInfo()
 {
-	if (isShow) {
-		isShow = false;
-		if (!isBuilt)
-			setOpacity(0);
-		bottleIcon->setVisible(false);
-		sunFlowerIcon->setVisible(false);
-		icedStarIcon->setVisible(false);
+	if (this->getIsShow() == true) {
+		setIsShow(false);
+		this->getContext()->setOpacity(0);
+		this->getContext()->bottleIcon->setVisible(false);
+		this->getContext()->sunFlowerIcon->setVisible(false);
+		this->getContext()->icedStarIcon->setVisible(false);
 	}
 }
 

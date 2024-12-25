@@ -202,8 +202,8 @@ void BaseTower::sellTower()
 	auto parent = dynamic_cast<Terrains*>(getParent());
 	GameManager::getGame()->Money += sellMoney;
 	parent->setTexture("GamePlay/select.png");
-	parent->setIsShow(0);
-	parent->setIsBuilt(0);
+	//Refactored with State Pattern
+	parent->TransitionTo(new TerrainUnbuiltState);
 	removeFromParentAndCleanup(true);
 }
 
@@ -270,69 +270,13 @@ void BaseTower::onTouchEnded(Touch* touch, Event* event)
 
 /**********************************************************/
 
-void Bottle::attack(float dt) {
-
-	if (chosenEnemy != NULL) {
-
-		auto animation = Animation::create();
-
-		char namesize[30] = { 0 };
-
-		sprintf(namesize, "Bottle/Bottle%d1.png", level);
-		animation->addSpriteFrameWithFile(namesize);
-		sprintf(namesize, "Bottle/Bottle%d2.png", level);
-		animation->addSpriteFrameWithFile(namesize);
-		sprintf(namesize, "Bottle/Bottle%d3.png", level);
-		animation->addSpriteFrameWithFile(namesize);
-		sprintf(namesize, "Bottle/Bottle%d1.png", level);
-		animation->addSpriteFrameWithFile(namesize);
-
-		animation->setLoops(1);
-		animation->setDelayPerUnit(0.1f);
-
-		auto shoot = Animate::create(animation);
-		SoundManager::PlayBottleAttackMusic();
-		runAction(Sequence::create(shoot
-			, CallFuncN::create(CC_CALLBACK_0(Bottle::shootWeapon, this))
-			, NULL));
-
-	}
-
-}
-
-void Bottle::shootWeapon() {
-
-	if (chosenEnemy != NULL) {
-
-		BottleBullet* bullet = BottleBullet::create();
-
-		Point src = chosenEnemy->convertToNodeSpace(getParent()->convertToWorldSpace(getPosition()));
-
-		Point dst = Vec2(chosenEnemy->getContentSize().width / 2, chosenEnemy->getContentSize().height / 2);
-
-		chosenEnemy->addChild(bullet);
-		bullet->setPosition(src);
-		bullet->setRotation(getAngle(chosenEnemy));
-
-		float dur = src.distance(dst) / speed;
-
-		if (chosenEnemy->IsReverse)
-			bullet->setRotation(180 - getRotation());
-
-		bullet->runAction(Sequence::create(CallFuncN::create(CC_CALLBACK_0(BottleBullet::shoot, bullet, level))
-			, MoveTo::create(dur, dst)
-			, CallFuncN::create(CC_CALLBACK_0(BottleBullet::removeFromParent, bullet))
-			, CallFuncN::create(CC_CALLBACK_0(Monster::getHurt, chosenEnemy, damage, Boom))
-			, NULL));
-
-	}
-
-}
-
 bool Bottle::init() {
 
 	if (!BaseTower::init())
 		return false;
+
+	behavior = new BottleBehavior();
+	behavior->setTower(this);
 
 	initData();
 
@@ -341,6 +285,136 @@ bool Bottle::init() {
 	schedule(schedule_selector(Bottle::attack), rate);
 
 	return true;
+
+}
+
+//Refactored with Bridge Pattern
+void BottleBehavior::update(float dt) {
+
+	if (tower->getUpdateMoney() <= GameManager::getGame()->Money && !tower->isUpdateMenuShown && tower->getLevel() < 3)
+		tower->updateSignal->setOpacity(255);
+	else
+		tower->updateSignal->setOpacity(0);
+
+	if (GameManager::getGame()->currentMonster.contains(tower->chosenEnemy) == false)
+		tower->chosenEnemy = NULL;
+
+	auto monsters = GameManager::getGame()->currentMonster;
+	Vector<Monster*>::iterator it = monsters.begin();
+	for (; it != monsters.end(); it++) {
+		if (tower->InattackRange(*it) && (*it)->getChosen()) {
+			tower->chosenEnemy = (*it);
+			break;
+		}
+	}
+
+	/*有攻击目标*/
+	if (tower->chosenEnemy) {
+
+		tower->setRotation(tower->getAngle(tower->chosenEnemy));
+
+		if (!tower->InattackRange(tower->chosenEnemy)) {
+			tower->chosenEnemy = NULL;
+		}
+
+	}
+	else {
+		if (tower->chosenEnemy == NULL) {
+			for (it = monsters.begin(); it != monsters.end(); it++) {
+				if (tower->InattackRange(*it)) {
+					tower->chosenEnemy = (*it);
+				}
+			}
+		}
+	}
+}
+
+//Refactored with Bridge Pattern
+void BottleBehavior::attack(float dt) {
+
+	if (tower->chosenEnemy != NULL) {
+
+		auto animation = Animation::create();
+
+		char namesize[30] = { 0 };
+
+		sprintf(namesize, "Bottle/Bottle%d1.png", tower->getLevel());
+		animation->addSpriteFrameWithFile(namesize);
+		sprintf(namesize, "Bottle/Bottle%d2.png", tower->getLevel());
+		animation->addSpriteFrameWithFile(namesize);
+		sprintf(namesize, "Bottle/Bottle%d3.png", tower->getLevel());
+		animation->addSpriteFrameWithFile(namesize);
+		sprintf(namesize, "Bottle/Bottle%d1.png", tower->getLevel());
+		animation->addSpriteFrameWithFile(namesize);
+
+		animation->setLoops(1);
+		animation->setDelayPerUnit(0.1f);
+
+		auto shoot = Animate::create(animation);
+		SoundManager::PlayBottleAttackMusic();
+		tower->runAction(Sequence::create(shoot
+			, CallFuncN::create(CC_CALLBACK_0(Bottle::shootWeapon, dynamic_cast<Bottle*>(this->tower)))
+			, NULL));
+
+	}
+}
+
+//Refactored with Bridge Pattern
+//升级防御塔，更新数据
+void BottleBehavior::updateTower()
+{
+	if (tower->getLevel() == 1) {
+		tower->setSellMoney(224);
+		GameManager::getGame()->Money -= tower->getUpdateMoney();
+		tower->setUpdateMoney(220);
+		tower->upgrade->loadTextures("Money/update_220.png", "Money/update_220.png");
+		tower->setTexture("Bottle/Bottle21.png");
+		tower->remove->loadTextures("Money/remove_224.png", "Money/remove_224.png");
+	}
+	else if (tower->getLevel() == 2) {
+		tower->setSellMoney(432);
+		GameManager::getGame()->Money -= tower->getUpdateMoney();
+		tower->upgrade->loadTextures("Money/update_max.png", "Money/update_max.png");
+		tower->setTexture("Bottle/Bottle31.png");
+		tower->remove->loadTextures("Money/remove_432.png", "Money/remove_432.png");
+		tower->upgrade->setPressedActionEnabled(false);
+	}
+	if (tower->getLevel() == 1 || tower->getLevel() == 2) {
+		tower->setLevel(tower->getLevel() + 1);
+		tower->setDamage(tower->getDamage() + 10);
+		tower->setRate(tower->getRate() - 0.2f);
+		tower->setScope(tower->getScope() + 0.2f);
+		tower->setSpeed(tower->getSpeed() + 100);
+	}
+}
+
+//Refactored with Bridge Pattern
+void BottleBehavior::shootWeapon() {
+
+	if (tower->chosenEnemy != NULL) {
+
+		BottleBullet* bullet = BottleBullet::create();
+
+		Point src = tower->chosenEnemy->convertToNodeSpace(tower->getParent()->convertToWorldSpace(tower->getPosition()));
+
+		Point dst = Vec2(tower->chosenEnemy->getContentSize().width / 2, tower->chosenEnemy->getContentSize().height / 2);
+
+		tower->chosenEnemy->addChild(bullet);
+		bullet->setPosition(src);
+		bullet->setRotation(tower->getAngle(tower->chosenEnemy));
+
+		float dur = src.distance(dst) / tower->getSpeed();
+
+		if (tower->chosenEnemy->IsReverse)
+			bullet->setRotation(180 - tower->getRotation());
+
+		bullet->runAction(Sequence::create(CallFuncN::create(CC_CALLBACK_0(BottleBullet::shoot, bullet, tower->getLevel()))
+			, MoveTo::create(dur, dst)
+			, CallFuncN::create(CC_CALLBACK_0(BottleBullet::removeFromParent, bullet))
+			, CallFuncN::create(CC_CALLBACK_0(Monster::getHurt, tower->chosenEnemy, tower->getDamage(), Boom))
+			, NULL));
+
+	}
 
 }
 
@@ -394,82 +468,122 @@ void Bottle::initEvent()
 
 }
 
-//升级防御塔，更新数据
-void Bottle::updateTower()
-{
-	if (level == 1) {
-		sellMoney = 224;
-		GameManager::getGame()->Money -= updateMoney;
-		updateMoney = 220;
-		upgrade->loadTextures("Money/update_220.png", "Money/update_220.png");
-		setTexture("Bottle/Bottle21.png");
-		remove->loadTextures("Money/remove_224.png", "Money/remove_224.png");
-	}
-	else if (level == 2) {
-		sellMoney = 432;
-		GameManager::getGame()->Money -= updateMoney;
-		upgrade->loadTextures("Money/update_max.png", "Money/update_max.png");
-		setTexture("Bottle/Bottle31.png");
-		remove->loadTextures("Money/remove_432.png", "Money/remove_432.png");
-		upgrade->setPressedActionEnabled(false);
-	}
-	if (level == 1 || level == 2) {
-		level++;
-		damage += 10;
-		rate -= 0.2f;
-		scope += 0.2f;
-		speed += 100;
-	}
-}
+/**********************************************************/
 
+//Refactored with Bridge Pattern
+void FlowerBehavior::update(float dt) {
 
-void Bottle::update(float dt) {
-
-	if (updateMoney <= GameManager::getGame()->Money && !isUpdateMenuShown && level < 3)
-		updateSignal->setOpacity(255);
+	if (tower->getUpdateMoney() <= GameManager::getGame()->Money && !tower->isUpdateMenuShown && tower->getLevel() < 3)
+		tower->updateSignal->setOpacity(255);
 	else
-		updateSignal->setOpacity(0);
+		tower->updateSignal->setOpacity(0);
 
-	if (GameManager::getGame()->currentMonster.contains(chosenEnemy) == false)
-		chosenEnemy = NULL;
-
-	auto monsters = GameManager::getGame()->currentMonster;
-	Vector<Monster*>::iterator it = monsters.begin();
-	for (; it != monsters.end(); it++) {
-		if (InattackRange(*it) && (*it)->getChosen()) {
-			chosenEnemy = (*it);
-			break;
-		}
-	}
+	if (GameManager::getGame()->currentMonster.contains(tower->chosenEnemy) == false)
+		tower->chosenEnemy = NULL;
 
 	/*有攻击目标*/
-	if (chosenEnemy) {
+	if (tower->chosenEnemy) {
 
-		setRotation(getAngle(chosenEnemy));
+		dynamic_cast<Flower*>(tower)->setIsAttack(true);
 
-		if (!InattackRange(chosenEnemy)) {
-			chosenEnemy = NULL;
+		if (!tower->InattackRange(tower->chosenEnemy)) {
+			tower->chosenEnemy = NULL;
 		}
 
 	}
 	else {
-		if (chosenEnemy == NULL) {
-			for (it = monsters.begin(); it != monsters.end(); it++) {
-				if (InattackRange(*it)) {
-					chosenEnemy = (*it);
-				}
+
+		auto monsters = GameManager::getGame()->currentMonster;
+		Vector<Monster*>::iterator it = monsters.begin();
+		for (; it != monsters.end(); it++) {
+			if (tower->InattackRange((*it))) {
+				tower->chosenEnemy = (*it);
+				break;
 			}
+		}
+		if (it == monsters.end())
+			dynamic_cast<Flower*>(tower)->setIsAttack(false);
+
+	}
+
+}
+
+//Refactored with Bridge Pattern
+void FlowerBehavior::attack(float dt) {
+	auto flower = dynamic_cast<Flower*>(tower);
+	if (flower->getIsAttack()) {
+
+		if (flower->getRotation() == 0)
+			flower->setRotation(25);
+		else
+			flower->setRotation(0);
+
+		char namesize[30] = { 0 };
+		sprintf(namesize, "Flower/PFlower%d.png", flower->getLevel());
+
+		auto bullet = Sprite::create("Flower/PFlower1.png");
+		flower->getParent()->addChild(bullet);
+		bullet->setPosition(flower->getParent()->getContentSize().width / 2, flower->getParent()->getContentSize().height / 2);
+		SoundManager::PlayFlowerAttackMusic();
+		bullet->runAction(Sequence::create(ScaleTo::create(0.3f, flower->getScope() + 1.0f)       //调整攻击动画范围
+			, DelayTime::create(0.2f)
+			, CallFuncN::create(CC_CALLBACK_0(Sprite::removeFromParent, bullet))
+			, NULL));
+
+		auto monsters = GameManager::getGame()->currentMonster;
+		Vector<Monster*>::iterator it = monsters.begin();
+		for (; it != monsters.end(); it++) {
+			if (flower->InattackRange(*it))
+				(*it)->getHurt(flower->getDamage(), Burn);
 		}
 	}
 }
 
-/**********************************************************/
+//Refactored with Bridge Pattern
+//太阳花的升级
+void FlowerBehavior::updateTower()
+{
+
+	auto parent = dynamic_cast<Terrains*>(tower->getParent());
+
+	if (tower->getLevel() == 1) {
+		tower->setSellMoney(336);
+		GameManager::getGame()->Money -= tower->getUpdateMoney();
+		tower->setUpdateMoney(260);
+		tower->upgrade->loadTextures("Money/update_260.png", "Money/update_260.png");
+		tower->setTexture("Flower/level2_bg.png");
+		tower->remove->loadTextures("Money/remove_336.png", "Money/remove_336.png");
+		parent->updateTerrain("Flower/level2.png");
+	}
+	else if (tower->getLevel() == 2) {
+		tower->setSellMoney(560);
+		GameManager::getGame()->Money -= tower->getUpdateMoney();
+		tower->upgrade->loadTextures("Money/update_max.png", "Money/update_max.png");
+		tower->setTexture("Flower/level3_bg.png");
+		tower->remove->loadTextures("Money/remove_560.png", "Money/remove_560.png");
+		tower->upgrade->setPressedActionEnabled(false);
+		parent->updateTerrain("Flower/level3.png");
+	}
+
+	tower->setPosition(parent->getContentSize().width / 2, parent->getContentSize().height / 2);
+
+	if (tower->getLevel() == 1 || tower->getLevel() == 2) {
+		tower->setLevel(tower->getLevel() + 1);
+		tower->setDamage(tower->getDamage() + 10);
+		tower->setRate(tower->getRate() - 0.3f);
+		tower->setScope(tower->getScope() + 0.2f);
+		tower->setSpeed(tower->getSpeed() + 100);
+	}
+}
 
 bool Flower::init() {
 
 	if (!BaseTower::init())
 		return false;
 	
+	behavior = new FlowerBehavior();
+	behavior->setTower(this);
+
 	initData();
 
 	scheduleUpdate();
@@ -482,7 +596,7 @@ bool Flower::init() {
 void Flower::initData()
 {
 	//初始化数据
-	IsAttack = false;
+	isAttack = false;
 	level = 1;
 	rate = 1.5f;
 	scope = 0.8f;
@@ -497,42 +611,6 @@ void Flower::initData()
 	attackRange->setVisible(false);
 	isUpdateMenuShown = false;
 	GameManager::getGame()->Money -= buildMoney;
-}
-
-//太阳花的升级
-void Flower::updateTower()
-{
-
-	auto parent = dynamic_cast<Terrains*>(getParent());
-
-	if (level == 1) {
-		sellMoney = 336;
-		GameManager::getGame()->Money -= updateMoney;
-		updateMoney = 260;
-		upgrade->loadTextures("Money/update_260.png", "Money/update_260.png");
-		setTexture("Flower/level2_bg.png");
-		remove->loadTextures("Money/remove_336.png", "Money/remove_336.png");
-		parent->updateTerrain("Flower/level2.png");
-	}
-	else if (level == 2) {
-		sellMoney = 560;
-		GameManager::getGame()->Money -= updateMoney;
-		upgrade->loadTextures("Money/update_max.png", "Money/update_max.png");
-		setTexture("Flower/level3_bg.png");
-		remove->loadTextures("Money/remove_560.png", "Money/remove_560.png");
-		upgrade->setPressedActionEnabled(false);
-		parent->updateTerrain("Flower/level3.png");
-	}
-
-	setPosition(parent->getContentSize().width / 2, parent->getContentSize().height / 2);
-
-	if (level == 1 || level == 2) {
-		level++;
-		damage += 10;
-		rate -= 0.3f;
-		scope += 0.2f;
-		speed += 100;
-	}
 }
 
 //添加事件监听器
@@ -566,81 +644,15 @@ void Flower::initEvent()
 
 }
 
-void Flower::attack(float dt) {
-
-	if (IsAttack) {
-
-		if (getRotation() == 0)
-			setRotation(25);
-		else
-			setRotation(0);
-
-		char namesize[30] = { 0 };
-		sprintf(namesize, "Flower/PFlower%d.png", level);
-
-		auto bullet = Sprite::create("Flower/PFlower1.png");
-		getParent()->addChild(bullet);
-		bullet->setPosition(getParent()->getContentSize().width / 2, getParent()->getContentSize().height / 2);
-		SoundManager::PlayFlowerAttackMusic();
-		bullet->runAction(Sequence::create(ScaleTo::create(0.3f, scope + 1.0f)       //调整攻击动画范围
-			, DelayTime::create(0.2f)
-			, CallFuncN::create(CC_CALLBACK_0(Sprite::removeFromParent, bullet))
-			, NULL));
-
-		auto monsters = GameManager::getGame()->currentMonster;
-		Vector<Monster*>::iterator it = monsters.begin();
-		for (; it != monsters.end(); it++) {
-			if (InattackRange(*it))
-				(*it)->getHurt(damage, Burn);
-		}
-
-	}
-
-}
-
-void Flower::update(float dt) {
-
-	if (updateMoney <= GameManager::getGame()->Money && !isUpdateMenuShown && level < 3)
-		updateSignal->setOpacity(255);
-	else
-		updateSignal->setOpacity(0);
-
-	if (GameManager::getGame()->currentMonster.contains(chosenEnemy) == false)
-		chosenEnemy = NULL;
-
-	/*有攻击目标*/
-	if (chosenEnemy) {
-
-		IsAttack = true;
-
-		if (!InattackRange(chosenEnemy)) {
-			chosenEnemy = NULL;
-		}
-
-	}
-	else {
-
-		auto monsters = GameManager::getGame()->currentMonster;
-		Vector<Monster*>::iterator it = monsters.begin();
-		for (; it != monsters.end(); it++) {
-			if (InattackRange((*it))) {
-				chosenEnemy = (*it);
-				break;
-			}
-		}
-		if (it == monsters.end())
-			IsAttack = false;
-
-	}
-
-}
-
 /****************************************************/
 
 bool Star::init() {
 
 	if (!BaseTower::init())
 		return false;
+
+	behavior = new FlowerBehavior();
+	behavior->setTower(this);
 
 	initData();
 
@@ -652,37 +664,38 @@ bool Star::init() {
 
 }
 
-void Star::update(float dt) {
+//Refactored with Bridge Pattern
+void StarBehavior::update(float dt) {
 
-	if (updateMoney <= GameManager::getGame()->Money && !isUpdateMenuShown && level < 3)
-		updateSignal->setOpacity(255);
+	if (tower->getUpdateMoney() <= GameManager::getGame()->Money && !tower->isUpdateMenuShown && tower->getLevel() < 3)
+		tower->updateSignal->setOpacity(255);
 	else
-		updateSignal->setOpacity(0);
+		tower->updateSignal->setOpacity(0);
 
-	if (GameManager::getGame()->currentMonster.contains(chosenEnemy) == false)
-		chosenEnemy = NULL;
+	if (GameManager::getGame()->currentMonster.contains(tower->chosenEnemy) == false)
+		tower->chosenEnemy = NULL;
 
 	auto monsters = GameManager::getGame()->currentMonster;
 	Vector<Monster*>::iterator it = monsters.begin();
 	for (; it != monsters.end(); it++) {
-		if (InattackRange(*it) && (*it)->getChosen()) {
-			chosenEnemy = (*it);
+		if (tower->InattackRange(*it) && (*it)->getChosen()) {
+			tower->chosenEnemy = (*it);
 			break;
 		}
 	}
 
 	/*有攻击目标*/
-	if (chosenEnemy) {
+	if (tower->chosenEnemy) {
 
-		if (!InattackRange(chosenEnemy)) {
-			chosenEnemy = NULL;
+		if (!tower->InattackRange(tower->chosenEnemy)) {
+			tower->chosenEnemy = NULL;
 		}
 
 	}
 	else {
 		for (it = monsters.begin(); it != monsters.end(); it++) {
-			if (InattackRange((*it))) {
-				chosenEnemy = (*it);
+			if (tower->InattackRange((*it))) {
+				tower->chosenEnemy = (*it);
 				break;
 			}
 		}
@@ -690,44 +703,78 @@ void Star::update(float dt) {
 
 }
 
-void Star::shootWeapon() {
+//Refactored with Bridge Pattern
+void StarBehavior::attack(float dt) {
 
-	if (chosenEnemy != NULL) {
+	if (tower->chosenEnemy != NULL) {
+
+		auto rotate = RotateTo::create(0.05f, tower->getAngle(tower->chosenEnemy));
+		auto rerotate = RotateTo::create(0.05f, 0);
+
+		tower->runAction(Sequence::create(rotate
+			, rerotate
+			, CallFuncN::create(CC_CALLBACK_0(Star::shootWeapon, dynamic_cast<Star*>(tower)))
+			, NULL));
+	}
+}
+
+//Refactored with Bridge Pattern
+void StarBehavior::updateTower()
+{
+	auto parent = dynamic_cast<Terrains*>(tower->getParent());
+
+	if (tower->getLevel() == 1) {
+		tower->setSellMoney(336);
+		GameManager::getGame()->Money -= tower->getUpdateMoney();
+		tower->setUpdateMoney(260);
+		tower->upgrade->loadTextures("Money/update_260.png", "Money/update_260.png");
+		tower->setTexture("Star/level2.png");
+		tower->remove->loadTextures("Money/remove_336.png", "Money/remove_336.png");
+		parent->updateTerrain("Star/level2_base.png");
+	}
+	else if (tower->getLevel() == 2) {
+		tower->setSellMoney(560);
+		GameManager::getGame()->Money -= tower->getUpdateMoney();
+		tower->upgrade->loadTextures("Money/update_max.png", "Money/update_max.png");
+		tower->setTexture("Star/level3.png");
+		tower->remove->loadTextures("Money/remove_560.png", "Money/remove_560.png");
+		tower->upgrade->setPressedActionEnabled(false);
+		parent->updateTerrain("Star/level3_base.png");
+	}
+
+	tower->setPosition(parent->getContentSize().width / 2, parent->getContentSize().height / 2);
+
+	if (tower->getLevel() == 1 || tower->getLevel() == 2) {
+		tower->setLevel(tower->getLevel() + 1);
+		tower->setDamage(tower->getDamage() + 10);
+		tower->setRate(tower->getRate() - 0.2f);
+		tower->setScope(tower->getScope() + 0.2f);
+		tower->setSpeed(tower->getSpeed() + 100);
+	}
+}
+
+//Refactored with Bridge Pattern
+void StarBehavior::shootWeapon() {
+
+	if (tower->chosenEnemy != NULL) {
 
 		StarBullet* bullet = StarBullet::create();
 
-		Point src = chosenEnemy->convertToNodeSpace(getParent()->convertToWorldSpace(getPosition()));
+		Point src = tower->chosenEnemy->convertToNodeSpace(tower->getParent()->convertToWorldSpace(tower->getPosition()));
 
-		Point dst = Vec2(chosenEnemy->getContentSize().width / 2, chosenEnemy->getContentSize().height / 2);
+		Point dst = Vec2(tower->chosenEnemy->getContentSize().width / 2, tower->chosenEnemy->getContentSize().height / 2);
 
-		chosenEnemy->addChild(bullet);
+		tower->chosenEnemy->addChild(bullet);
 		bullet->setPosition(src);
-		bullet->setRotation(getAngle(chosenEnemy));
+		bullet->setRotation(tower->getAngle(tower->chosenEnemy));
 
-		float dur = src.distance(dst) / speed;
+		float dur = src.distance(dst) / tower->getSpeed();
 		SoundManager::PlayStarAttackMusic();
-		bullet->runAction(Sequence::create(CallFuncN::create(CC_CALLBACK_0(StarBullet::shoot, bullet, level))
+		bullet->runAction(Sequence::create(CallFuncN::create(CC_CALLBACK_0(StarBullet::shoot, bullet, tower->getLevel()))
 			, MoveTo::create(dur, dst)
 			, CallFuncN::create(CC_CALLBACK_0(BottleBullet::removeFromParent, bullet))
-			,CallFuncN::create(CC_CALLBACK_0(Star::attackScope,this))
+			, CallFuncN::create(CC_CALLBACK_0(Star::attackScope, dynamic_cast<Star*>(tower)))
 			, NULL));
-
-	}
-
-}
-
-void Star::attack(float dt) {
-
-	if (chosenEnemy != NULL) {
-
-		auto rotate = RotateTo::create(0.05f, getAngle(chosenEnemy));
-		auto rerotate = RotateTo::create(0.05f, 0);
-
-		runAction(Sequence::create(rotate
-			, rerotate
-			,CallFuncN::create(CC_CALLBACK_0(Star::shootWeapon,this))
-			,NULL));
-
 	}
 }
 
@@ -751,40 +798,6 @@ void Star::initData()
 	GameManager::getGame()->Money -= buildMoney;
 }
 
-void Star::updateTower()
-{
-
-	auto parent = dynamic_cast<Terrains*>(getParent());
-
-	if (level == 1) {
-		sellMoney = 336;
-		GameManager::getGame()->Money -= updateMoney;
-		updateMoney = 260;
-		upgrade->loadTextures("Money/update_260.png", "Money/update_260.png");
-		setTexture("Star/level2.png");
-		remove->loadTextures("Money/remove_336.png", "Money/remove_336.png");
-		parent->updateTerrain("Star/level2_base.png");
-	}
-	else if (level == 2) {
-		sellMoney = 560;
-		GameManager::getGame()->Money -= updateMoney;
-		upgrade->loadTextures("Money/update_max.png", "Money/update_max.png");
-		setTexture("Star/level3.png");
-		remove->loadTextures("Money/remove_560.png", "Money/remove_560.png");
-		upgrade->setPressedActionEnabled(false);
-		parent->updateTerrain("Star/level3_base.png");
-	}
-
-	setPosition(parent->getContentSize().width / 2, parent->getContentSize().height / 2);
-
-	if (level == 1 || level == 2) {
-		level++;
-		damage += 10;
-		rate -= 0.2f;
-		scope += 0.2f;
-		speed += 100;
-	}
-}
 //添加事件监听器
 void Star::initEvent()
 {

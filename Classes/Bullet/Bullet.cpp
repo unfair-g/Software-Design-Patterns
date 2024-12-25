@@ -19,7 +19,6 @@ bool BottleBullet::init() {
 
 }
 
-/*瓶子炮子弹的攻击动画*/
 void BottleBullet::shoot(int level) {
 	
 	auto animation = Animation::create();
@@ -46,7 +45,6 @@ bool StarBullet::init() {
 	return true;
 }
 
-/*冰星星子弹的攻击动画*/
 void StarBullet::shoot(int level) {
 
 	char namesize[30] = { 0 };

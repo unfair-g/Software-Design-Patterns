@@ -57,13 +57,9 @@ void TouchLayer::onTouchEnded(Touch* touch, Event* event)
 	for (size_t i = 0; i < map->terrain.size(); i++) {
 		auto element = map->terrain[i];
 		//若存在显示信息，则隐藏
-		if (element->getIsShow()) {
-			//若没有建炮塔，隐藏建塔菜单
-			if (!element->getIsBuilt())
-				element->hideTowerPanleLayer();
-			//若建造了炮塔，隐藏炮塔信息
-			else
-				element->hideTowerInfo();
+		//Refactored with State Pattern
+		if (element->getState()->getIsShow() == true) {
+			element->hideInfo();
 			return;
 		}
 	}
@@ -74,10 +70,8 @@ void TouchLayer::onTouchEnded(Touch* touch, Event* event)
 		Rect rect = element->getBoundingBox();
 		if (rect.containsPoint(pos))
 		{
-			if (!element->getIsBuilt())
-				element->showTowerPanleLayer();
-			else
-				element->showTowerInfo();
+			//Refactored with State Pattern
+			element->showInfo();
 			isRightPlace = 1;
 			return;
 		}
